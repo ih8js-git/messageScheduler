@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { ApplicationCommandInputType, ApplicationCommandOptionType } from "@api/Commands";
+import { ApplicationCommandInputType, ApplicationCommandOptionType, sendBotMessage } from "@api/Commands";
 import { definePluginSettings } from "@api/Settings";
 import { sendMessage } from "@utils/discord";
 import { Logger } from "@utils/Logger";
@@ -154,9 +154,10 @@ export default definePlugin({
                 const timeStr = args.find(arg => arg.name === "time")?.value as string;
 
                 if (!message || !timeStr) {
-                    return {
+                    sendBotMessage(ctx.channel.id, {
                         content: "❌ Please provide both a message and a time."
-                    };
+                    });
+                    return;
                 }
 
                 // Try to parse as relative time first
@@ -168,23 +169,25 @@ export default definePlugin({
                     if (exactTime !== null) {
                         delay = exactTime - Date.now();
                     } else {
-                        return {
+                        sendBotMessage(ctx.channel.id, {
                             content: "❌ Invalid time format. Use relative time (e.g. '1h30m', '45s') or exact time (e.g. '3:30pm', '15:45')."
-                        };
+                        });
+                        return;
                     }
                 }
 
                 if (delay <= 0) {
-                    return {
+                    sendBotMessage(ctx.channel.id, {
                         content: "❌ The scheduled time must be in the future."
-                    };
+                    });
+                    return;
                 }
 
                 scheduleMessage(ctx.channel.id, message, delay);
 
-                return {
+                sendBotMessage(ctx.channel.id, {
                     content: `✅ Message scheduled to be sent ${moment().add(delay, "ms").fromNow()}.`
-                };
+                });
             }
         },
         {
@@ -195,9 +198,10 @@ export default definePlugin({
                 const channelMessages = scheduledMessages.filter(msg => msg.channelId === ctx.channel.id);
 
                 if (channelMessages.length === 0) {
-                    return {
+                    sendBotMessage(ctx.channel.id, {
                         content: "No scheduled messages for this channel."
-                    };
+                    });
+                    return;
                 }
 
                 const messageList = channelMessages.map((msg, index) => {
@@ -209,9 +213,9 @@ export default definePlugin({
                     return `${index + 1}. **${timeStr}**: ${preview}`;
                 }).join("\n");
 
-                return {
+                sendBotMessage(ctx.channel.id, {
                     content: `**Scheduled Messages:**\n${messageList}`
-                };
+                });
             }
         },
         {
@@ -231,23 +235,26 @@ export default definePlugin({
                 const index = typeof indexArg === "number" ? indexArg : 0;
 
                 if (index <= 0) {
-                    return {
+                    sendBotMessage(ctx.channel.id, {
                         content: "❌ Please provide a valid message index (use /scheduled to see indices)."
-                    };
+                    });
+                    return;
                 }
 
                 const channelMessages = scheduledMessages.filter(msg => msg.channelId === ctx.channel.id);
 
                 if (channelMessages.length === 0) {
-                    return {
+                    sendBotMessage(ctx.channel.id, {
                         content: "No scheduled messages for this channel."
-                    };
+                    });
+                    return;
                 }
 
                 if (index > channelMessages.length) {
-                    return {
+                    sendBotMessage(ctx.channel.id, {
                         content: `❌ Invalid index. There are only ${channelMessages.length} scheduled messages.`
-                    };
+                    });
+                    return;
                 }
 
                 const messageToCancel = channelMessages[index - 1];
@@ -258,9 +265,9 @@ export default definePlugin({
                     scheduledMessages.splice(globalIndex, 1);
                 }
 
-                return {
+                sendBotMessage(ctx.channel.id, {
                     content: "✅ Scheduled message cancelled."
-                };
+                });
             }
         }
     ],
