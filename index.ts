@@ -100,10 +100,9 @@ function scheduleMessage(channelId: string, content: string, delay: number): voi
         }
 
         if (settings.store.showNotifications) {
-            Vencord.Webpack.Common.Toasts.show({
-                type: Vencord.Webpack.Common.Toasts.Type.SUCCESS,
-                message: "Scheduled message sent!",
-                id: "vc-scheduled-message-sent"
+            Vencord.Webpack.Common.showToast({
+                variant: "success",
+                text: "Scheduled message sent!"
             });
         }
     }, delay);
@@ -116,10 +115,9 @@ function scheduleMessage(channelId: string, content: string, delay: number): voi
     });
 
     if (settings.store.showNotifications) {
-        Vencord.Webpack.Common.Toasts.show({
-            type: Vencord.Webpack.Common.Toasts.Type.SUCCESS,
-            message: `Message scheduled for ${moment(scheduledTime).format("LT")}`,
-            id: "vc-message-scheduled"
+        Vencord.Webpack.Common.showToast({
+            variant: "success",
+            text: `Message scheduled for ${moment(scheduledTime).format("LT")}`
         });
     }
 }
